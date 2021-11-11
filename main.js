@@ -1,25 +1,26 @@
 import mqtt from 'mqtt';
 import fetch from 'node-fetch';
-const mqttAddr = `mqtt://${process.env.MQTT}`;
 const sensors = process.env.SENSORS && process.env.SENSORS.split(',');
 
 const getSensor = async (sensor) => {
         const response = await fetch('http://' + sensor);
-        const data = await response.text();
+        const data = await response.json();
         return data;
 }
 
 const getSensors = async (client) => {
         sensors.forEach(async (s) => {
                 const data = await getSensor(s);
-                client.publish('sensors', data)
-                console.log( 'Published', data );
+		data.topic = 'sensors/' + data.topic;
+                client.publish('sensors', JSON.stringify(data));
+                console.log( 'Published', JSON.stringify(data));
         })
 }
 
 const main = () => {
-        const client = mqtt.connect(`${mqttAddr}`);
+	const mqttAddr = 'tcp://' + process.env.MQTT;
 	console.log(`Connecting to ${mqttAddr}`);
+        const client = mqtt.connect(mqttAddr);
         client.on('connect', () => {
 		console.log('Connected');
                 getSensors(client);
