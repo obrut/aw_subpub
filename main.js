@@ -11,7 +11,7 @@ const getSensor = async (sensor) => {
 const getSensors = async (client) => {
         sensors.forEach(async (s) => {
                 const data = await getSensor(s);
-		data.topic = 'sensors/' + data.topic;
+		data.name = 'sensors/' + data.name;
                 client.publish('sensors', JSON.stringify(data));
                 console.log( 'Published', JSON.stringify(data));
         })
